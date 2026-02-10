@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Ludo Empire - Premium Online Multiplayer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="screen active">
+            <div class="loading-container">
+                <div class="logo">
+                    <div class="dice-logo">
+                        <div class="dice-face front">1</div>
+                        <div class="dice-face back">6</div>
+                        <div class="dice-face right">3</div>
+                        <div class="dice-face left">4</div>
+                        <div class="dice-face top">2</div>
+                        <div class="dice-face bottom">5</div>
+                    </div>
+                    <h1>LUDO EMPIRE</h1>
+                </div>
+                <div class="loading-bar">
+                    <div class="progress"></div>
+                </div>
+                <p class="loading-text">Loading Assets...</p>
+            </div>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="main-menu" class="screen">
+            <div class="menu-bg">
+                <div class="particle-container"></div>
+            </div>
+            <div class="menu-content">
+                <div class="game-logo">
+                    <h1>LUDO<span>EMPIRE</span></h1>
+                    <p class="tagline">Royal Battle of Strategy</p>
+                </div>
+                
+                <div class="menu-buttons">
+                    <button class="btn btn-primary btn-glow" id="btn-quick-play">
+                        <span class="icon">⚡</span>
+                        <span class="text">Quick Play</span>
+                        <span class="subtext">Find match instantly</span>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="btn-create-room">
+                        <span class="icon">👑</span>
+                        <span class="text">Create Room</span>
+                        <span class="subtext">Play with friends</span>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="btn-join-room">
+                        <span class="icon">🔑</span>
+                        <span class="text">Join Room</span>
+                        <span class="subtext">Enter room code</span>
+                    </button>
+                    
+                    <button class="btn btn-tertiary" id="btn-profile">
+                        <span class="icon">👤</span>
+                        <span class="text">Profile</span>
+                    </button>
+                </div>
+
+                <div class="menu-footer">
+                    <div class="online-count">
+                        <span class="pulse"></span>
+                        <span id="online-players">12,847</span> Online
+                    </div>
+                    <div class="version">v2.0.1</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room Creation -->
+        <div id="create-room-screen" class="screen">
+            <div class="screen-header">
+                <button class="btn-back">←</button>
+                <h2>Create Room</h2>
+            </div>
+            <div class="room-settings">
+                <div class="setting-group">
+                    <label>Game Mode</label>
+                    <div class="mode-selector">
+                        <button class="mode-btn active" data-mode="classic">Classic</button>
+                        <button class="mode-btn" data-mode="quick">Quick</button>
+                        <button class="mode-btn" data-mode="master">Master</button>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <label>Max Players</label>
+                    <div class="player-count">
+                        <button class="count-btn active" data-count="2">2</button>
+                        <button class="count-btn" data-count="3">3</button>
+                        <button class="count-btn" data-count="4">4</button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="private-room">
+                        <span class="toggle"></span>
+                        Private Room
+                    </label>
+                </div>
+
+                <div class="setting-group" id="password-group" style="display:none;">
+                    <label>Password</label>
+                    <input type="text" id="room-password" placeholder="Enter password" maxlength="10">
+                </div>
+
+                <button class="btn btn-primary btn-full" id="btn-create">Create Game</button>
+            </div>
+        </div>
+
+        <!-- Lobby -->
+        <div id="lobby-screen" class="screen">
+            <div class="lobby-header">
+                <div class="room-info">
+                    <span class="room-label">ROOM CODE</span>
+                    <h2 id="room-code">A7B9C2</h2>
+                    <button class="btn-copy" id="btn-copy-code">Copy</button>
+                </div>
+                <div class="lobby-actions">
+                    <button class="btn-icon" id="btn-settings">⚙️</button>
+                    <button class="btn-icon" id="btn-leave-lobby">✕</button>
+                </div>
+            </div>
+
+            <div class="players-container" id="players-list">
+                <!-- Players injected here -->
+            </div>
+
+            <div class="lobby-chat" id="lobby-chat">
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input" placeholder="Type a message..." maxlength="200">
+                    <button id="btn-send">➤</button>
+                </div>
+            </div>
+
+            <div class="lobby-footer">
+                <button class="btn btn-primary btn-full btn-large" id="btn-start-game" disabled>
+                    Waiting for players...
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-ui">
+                <!-- Top Bar -->
+                <div class="game-header">
+                    <div class="match-timer" id="match-timer">00:00</div>
+                    <div class="game-actions">
+                        <button class="btn-icon" id="btn-sound">🔊</button>
+                        <button class="btn-icon" id="btn-pause">⏸</button>
+                    </div>
+                </div>
+
+                <!-- Player Slots -->
+                <div class="players-bar" id="game-players">
+                    <!-- Dynamic player slots -->
+                </div>
+
+                <!-- Turn Indicator -->
+                <div class="turn-indicator" id="turn-indicator">
+                    <div class="turn-arrow"></div>
+                    <span class="turn-text">Your Turn!</span>
+                </div>
+
+                <!-- Game Board Container -->
+                <div class="board-container" id="board-container">
+                    <canvas id="game-canvas"></canvas>
+                    
+                    <!-- Dice Container -->
+                    <div class="dice-container" id="dice-container">
+                        <div class="dice" id="dice">
+                            <div class="dice-face" data-face="1">
+                                <div class="dot center"></div>
+                            </div>
+                            <div class="dice-face" data-face="2">
+                                <div class="dot top-left"></div>
+                                <div class="dot bottom-right"></div>
+                            </div>
+                            <div class="dice-face" data-face="3">
+                                <div class="dot top-left"></div>
+                                <div class="dot center"></div>
+                                <div class="dot bottom-right"></div>
+                            </div>
+                            <div class="dice-face" data-face="4">
+                                <div class="dot top-left"></div>
+                                <div class="dot top-right"></div>
+                                <div class="dot bottom-left"></div>
+                                <div class="dot bottom-right"></div>
+                            </div>
+                            <div class="dice-face" data-face="5">
+                                <div class="dot top-left"></div>
+                                <div class="dot top-right"></div>
+                                <div class="dot center"></div>
+                                <div class="dot bottom-left"></div>
+                                <div class="dot bottom-right"></div>
+                            </div>
+                            <div class="dice-face" data-face="6">
+                                <div class="dot top-left"></div>
+                                <div class="dot top-right"></div>
+                                <div class="dot middle-left"></div>
+                                <div class="dot middle-right"></div>
+                                <div class="dot bottom-left"></div>
+                                <div class="dot bottom-right"></div>
+                            </div>
+                        </div>
+                        <div class="dice-shadow"></div>
+                        <button class="btn-roll" id="btn-roll" disabled>ROLL</button>
+                    </div>
+                </div>
+
+                <!-- Move Hints -->
+                <div class="move-hints" id="move-hints"></div>
+            </div>
+
+            <!-- Game Over Modal -->
+            <div class="modal" id="game-over-modal">
+                <div class="modal-content">
+                    <h2>Game Over!</h2>
+                    <div class="podium" id="podium">
+                        <!-- Winners -->
+                    </div>
+                    <div class="rewards">
+                        <div class="reward-item">
+                            <span class="icon">🏆</span>
+                            <span class="value">+150 XP</span>
+                        </div>
+                        <div class="reward-item">
+                            <span class="icon">💰</span>
+                            <span class="value">+500 Coins</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-full" id="btn-play-again">Play Again</button>
+                    <button class="btn btn-secondary btn-full" id="btn-main-menu">Main Menu</button>
+                </div>
+            </div>
+
+            <!-- Pause Menu -->
+            <div class="modal" id="pause-modal">
+                <div class="modal-content">
+                    <h2>Paused</h2>
+                    <button class="btn btn-primary btn-full" id="btn-resume">Resume</button>
+                    <button class="btn btn-secondary btn-full" id="btn-leave-game">Leave Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils/Constants.js"></script>
+    <script src="js/utils/MathUtils.js"></script>
+    <script src="js/utils/Easing.js"></script>
+    <script src="js/network/NetworkManager.js"></script>
+    <script src="js/network/LatencyCompensator.js"></script>
+    <script src="js/core/AssetManager.js"></script>
+    <script src="js/core/StateMachine.js"></script>
+    <script src="js/core/GameEngine.js"></script>
+    <script src="js/game/BoardRenderer.js"></script>
+    <script src="js/game/TokenManager.js"></script>
+    <script src="js/game/DiceSystem.js"></script>
+    <script src="js/game/CameraController.js"></script>
+    <script src="js/ui/UIManager.js"></script>
+    <script src="js/ui/ScreenManager.js"></script>
+    <script src="js/ui/TouchHandler.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
