@@ -1131,3 +1131,93 @@ input[type="checkbox"] {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255,255,255,0.3);
 }
+/* Premium UI Enhancements */
+.premium-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(45, 52, 54, 0.95);
+    padding: 16px 24px;
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 2000;
+    min-width: 250px;
+    animation: toastReveal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+}
+
+.premium-toast.error { border-left-color: var(--danger); }
+.premium-toast.success { border-left-color: var(--success); }
+.premium-toast.capture { border-left-color: var(--accent); }
+
+.premium-toast.fade-out {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+    transition: all 0.5s ease;
+}
+
+@keyframes toastReveal {
+    from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.toast-icon { font-size: 20px; }
+
+/* Turn Indicator Enhancements */
+.turn-indicator.my-turn {
+    background: linear-gradient(135deg, var(--success), var(--secondary));
+    box-shadow: 0 0 20px rgba(0, 184, 148, 0.4);
+}
+
+.turn-indicator.opp-turn {
+    background: linear-gradient(135deg, var(--dark), #444);
+    opacity: 0.8;
+}
+
+/* Screen Shake Effect */
+.shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Podium Styles */
+.podium {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 10px;
+    height: 150px;
+    margin: 20px 0;
+}
+
+.podium-place {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+}
+
+.place-1 { height: 100%; border: 2px solid var(--accent); background: rgba(253, 203, 110, 0.1); }
+.place-2 { height: 70%; }
+.place-3 { height: 50%; }
+
+.place-num {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 5px;
+}

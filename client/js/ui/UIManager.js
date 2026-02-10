@@ -7,11 +7,26 @@ class UIManager {
     constructor() {
         this.eventHandlers = new Map();
         this.currentScreen = 'loading-screen';
+        this.sounds = {
+            click: new Audio('assets/sounds/click.mp3'),
+            dice: new Audio('assets/sounds/dice-roll.mp3'),
+            move: new Audio('assets/sounds/move.mp3'),
+            capture: new Audio('assets/sounds/capture.mp3'),
+            win: new Audio('assets/sounds/win.mp3')
+        };
+        this.isMuted = false;
         this.init();
     }
 
     init() {
-        // Back buttons
+        // Sound toggle
+        const soundBtn = document.getElementById('btn-sound');
+        if (soundBtn) {
+            soundBtn.addEventListener('click', () => {
+                this.isMuted = !this.isMuted;
+                soundBtn.textContent = this.isMuted ? '🔇' : '🔊';
+            });
+        }
         document.querySelectorAll('.btn-back').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.trigger('navigate', 'menu');
@@ -32,18 +47,33 @@ class UIManager {
         }
     }
 
-    showError(msg) {
-        console.error('UI ERROR:', msg);
-        // Simple alert for now, can be a toast
-        const toast = document.createElement('div');
-        toast.className = 'error-toast';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+    playSound(name) {
+        if (this.isMuted || !this.sounds[name]) return;
+        this.sounds[name].currentTime = 0;
+        this.sounds[name].play().catch(() => { });
     }
 
-    showNotification(msg) {
-        console.log('NOTIFICATION:', msg);
+    showError(msg) {
+        this.playSound('click');
+        const toast = document.createElement('div');
+        toast.className = 'premium-toast error';
+        toast.innerHTML = `<span class="toast-icon">⚠️</span> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
+    showNotification(msg, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `premium-toast ${type}`;
+        toast.innerHTML = `<span class="toast-icon">✨</span> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 500);
+        }, 2000);
     }
 
     showModal(id) {
@@ -109,12 +139,19 @@ class UIManager {
         const indicator = document.getElementById('turn-indicator');
         if (indicator) {
             indicator.style.display = 'flex';
-            indicator.querySelector('.turn-text').textContent = isMyTurn ? 'Your Turn!' : "Opponent's Turn";
+            indicator.className = `turn-indicator ${isMyTurn ? 'my-turn' : 'opp-turn'}`;
+            indicator.querySelector('.turn-text').textContent = isMyTurn ? 'Your Turn!' : "Wait for opponent...";
+            if (isMyTurn) this.playSound('win'); // Low volume notification sound ideally
         }
     }
 
     showCaptureEffect(attacker, victim) {
-        this.showNotification(`${attacker} captured ${victim}!`);
+        this.playSound('capture');
+        this.showNotification(`${attacker} captured ${victim}!`, 'capture');
+
+        // Add screen shake
+        document.getElementById('game-screen').classList.add('shake');
+        setTimeout(() => document.getElementById('game-screen').classList.remove('shake'), 500);
     }
 
     showWinnerNotification(playerId) {
