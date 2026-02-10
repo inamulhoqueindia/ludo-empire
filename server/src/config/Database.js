@@ -5,6 +5,7 @@ dotenv.config();
 // TUMHARE CONFIGURATIONS (Support ENV variables for deployment)
 const dbConfig = {
     host: process.env.DB_HOST || 'sql206.infinityfree.com',
+    port: process.env.DB_PORT || 3306,
     user: process.env.DB_USER || 'if0_41097646',
     password: process.env.DB_PASSWORD || '73UjmJHxm9F9zJ',
     database: process.env.DB_NAME || 'if0_41097646_ludo',

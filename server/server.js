@@ -34,9 +34,11 @@ app.get('/', (req, res) => {
     res.send('<h1>🎮 Ludo Empire Server is Running!</h1><p>Frontend is hosted separately. Connect via Socket.io.</p>');
 });
 
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+    const dbStatus = await testConnection();
     res.json({
-        status: 'healthy',
+        status: dbStatus ? 'healthy' : 'degraded',
+        db: dbStatus ? 'connected' : 'disconnected',
         timestamp: Date.now(),
         uptime: process.uptime(),
         connections: io.engine.clientsCount
