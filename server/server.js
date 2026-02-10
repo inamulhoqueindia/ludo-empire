@@ -30,9 +30,13 @@ const io = new SocketIOServer(httpServer, {
     maxHttpBufferSize: 1e6
 });
 
+app.get('/', (req, res) => {
+    res.send('<h1>🎮 Ludo Empire Server is Running!</h1><p>Frontend is hosted separately. Connect via Socket.io.</p>');
+});
+
 app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'healthy', 
+    res.json({
+        status: 'healthy',
         timestamp: Date.now(),
         uptime: process.uptime(),
         connections: io.engine.clientsCount
@@ -53,7 +57,7 @@ process.on('unhandledRejection', (reason, promise) => {
 httpServer.listen(PORT, async () => {
     logger.info(`🎮 Ludo Empire Server running on port ${PORT}`);
     logger.info(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-    
+
     // Database connect
     await testConnection();
 });

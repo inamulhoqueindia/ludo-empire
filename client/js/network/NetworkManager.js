@@ -10,26 +10,45 @@ class NetworkManager {
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 3000;
-        
+
         this.eventHandlers = new Map();
         this.latency = 0;
         this.serverTimeOffset = 0;
-        
+
         this.playerId = null;
         this.roomId = null;
     }
 
     connect(serverUrl) {
         return new Promise((resolve, reject) => {
+            console.log('Socket.io connecting to:', serverUrl);
+
+            // Timeout for connection
+            const timeout = setTimeout(() => {
+                if (!this.isConnected) {
+                    console.warn('Connection attempt timed out');
+                    resolve(); // Resolve anyway to let the app show the menu
+                }
+            }, 8000);
+
             this.socket = io(serverUrl, {
-                transports: ['websocket'],
-                upgrade: true,
-                rememberUpgrade: true,
+                transports: ['polling', 'websocket'], // Allow polling for better compatibility
                 reconnection: true,
                 reconnectionAttempts: this.maxReconnectAttempts,
-                reconnectionDelay: this.reconnectDelay,
-                reconnectionDelayMax: 10000,
-                randomizationFactor: 0.5
+                reconnectionDelay: this.reconnectDelay
+            });
+
+            this.socket.on('connect', () => {
+                clearTimeout(timeout);
+                console.log('Successfully connected to server!');
+                this.isConnected = true;
+                this.reconnectAttempts = 0;
+                resolve();
+            });
+
+            this.socket.on('connect_error', (error) => {
+                console.warn('Connection error:', error.message);
+                // We don't reject here to allow automatic retries
             });
 
             this.setupEventHandlers(resolve, reject);
@@ -42,12 +61,12 @@ class NetworkManager {
             console.log('Connected to server');
             this.isConnected = true;
             this.reconnectAttempts = 0;
-            
+
             if (this.playerId) {
                 // Attempt reconnection with existing session
                 this.emit('reconnect_attempt', { playerId: this.playerId, roomId: this.roomId });
             }
-            
+
             resolve();
         });
 

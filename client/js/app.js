@@ -4,7 +4,7 @@
  */
 
 // CHANGE THIS TO YOUR LIVE SERVER URL WHEN DEPLOYED (e.g., https://ludo-server.onrender.com)
-const SERVER_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://YOUR_RENDER_APP_URL.onrender.com';
+const SERVER_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://ludo-empire.onrender.com';
 
 class LudoApp {
     constructor() {
@@ -20,26 +20,39 @@ class LudoApp {
     }
 
     async init() {
-        // Initialize UI
+        console.log('Initializing LudoApp...');
+
+        // Initialize UI immediate
         this.setupUI();
 
-        // Connect to server
+        // Ensure we transition to menu even if connection is slow/fails
+        const loadingFallback = setTimeout(() => {
+            if (this.currentState === 'loading') {
+                console.log('Loading timeout reached, forcing menu...');
+                this.changeState('menu');
+            }
+        }, 5000); // 5 seconds max for loading screen
+
+        // Setup game loop & input
+        this.setupInputHandlers();
+
+        // Connect to server in background
         try {
+            console.log('Connecting to server:', SERVER_URL);
             await this.network.connect(SERVER_URL);
             this.setupNetworkHandlers();
             this.authenticate();
+            console.log('Network connected and authenticated.');
         } catch (error) {
-            console.error('Failed to connect:', error);
-            this.ui.showError('Connection failed. Retrying...');
+            console.error('Initial connection failed:', error);
+            this.ui.showError('Connection failed. Sitting in offline mode.');
+        } finally {
+            // If we are still in loading state, move to menu
+            if (this.currentState === 'loading') {
+                this.changeState('menu');
+                clearTimeout(loadingFallback);
+            }
         }
-
-        // Setup game loop
-        this.setupInputHandlers();
-
-        // Transition to menu after loading
-        setTimeout(() => {
-            this.changeState('menu');
-        }, 2000);
     }
 
     setupUI() {
