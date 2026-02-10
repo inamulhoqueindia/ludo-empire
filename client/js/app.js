@@ -21,17 +21,22 @@ class LudoApp {
 
     async init() {
         console.log('Initializing LudoApp...');
+        alert('LudoApp Initializing...'); // DEBUG
 
         // Initialize UI immediate
-        this.setupUI();
+        try {
+            this.setupUI();
+            alert('UI Setup done'); // DEBUG
+        } catch (e) { alert('UI Setup Error: ' + e.message); }
 
         // Ensure we transition to menu even if connection is slow/fails
         const loadingFallback = setTimeout(() => {
             if (this.currentState === 'loading') {
                 console.log('Loading timeout reached, forcing menu...');
+                alert('Loading taking too long, forcing menu...'); // DEBUG
                 this.changeState('menu');
             }
-        }, 5000); // 5 seconds max for loading screen
+        }, 10000); // 10 seconds for debugging
 
         // Setup game loop & input
         this.setupInputHandlers();
@@ -39,13 +44,16 @@ class LudoApp {
         // Connect to server in background
         try {
             console.log('Connecting to server:', SERVER_URL);
+            alert('Connecting to: ' + SERVER_URL); // DEBUG
             await this.network.connect(SERVER_URL);
+            alert('Connected successfully!'); // DEBUG
             this.setupNetworkHandlers();
             this.authenticate();
             console.log('Network connected and authenticated.');
         } catch (error) {
             console.error('Initial connection failed:', error);
             this.ui.showError('Connection failed. Sitting in offline mode.');
+            alert('Network Error: ' + error.message); // DEBUG
         } finally {
             // If we are still in loading state, move to menu
             if (this.currentState === 'loading') {
